@@ -285,15 +285,22 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
 
 /* ===== RANGE TANGGAL STYLE ===== */
 
+/* ===== RANGE TANGGAL - GRID 2 KOLOM ===== */
+
 .date-row {
-  display: flex;
-  flex-direction: row;   /* selalu sejajar */
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* 2 kolom sama besar */
   gap: 12px;
+  align-items: start;
 }
 
 .date-field {
-  flex: 1;              /* bagi 2 sama rata */
-  min-width: 0;         /* penting supaya tidak overflow */
+  width: 100%;
+  min-width: 0; /* penting agar tidak overflow */
+}
+
+.date-divider {
+  display: none; /* divider tidak perlu lagi */
 }
 
 .date-field label {
@@ -309,12 +316,12 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
 
 .date-input-wrapper input {
   width: 100%;
-  padding: 8px 10px;
+  padding: 9px 10px;
   border-radius: 8px;
   border: 1px solid #d0d7de;
   background: #f9fafb;
   transition: all 0.2s ease;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .date-input-wrapper input:focus {
