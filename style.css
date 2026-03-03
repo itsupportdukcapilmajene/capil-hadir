@@ -287,11 +287,11 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
 
 .date-row {
   display: flex;
-  gap: 14px;
+  gap: 16px;
 }
 
 .date-field {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -322,6 +322,8 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
   transition: all 0.2s ease;
   font-size: 14px;
   min-width: 0;
+    max-width: 100%;
+  padding: 8px 10px; /* lebih ramping dari 10px 12px */
 }
 
 .date-input-wrapper input:focus {
