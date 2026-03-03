@@ -283,53 +283,45 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
   padding-bottom: calc(14px + env(safe-area-inset-bottom));
 }
 
-/* ===== RANGE TANGGAL STYLE ===== */
+/* ===== RANGE TANGGAL - VERSI LEBIH RAPI ===== */
 
 .date-row {
   display: flex;
-  flex-direction: row;   /* selalu sejajar */
-  gap: 12px;
+  gap: 16px;              /* lebih lega */
+  margin-top: 8px;
+  margin-bottom: 18px;    /* kasih jarak ke Keterangan */
 }
 
 .date-field {
-  flex: 1;              /* bagi 2 sama rata */
-  min-width: 0;         /* penting supaya tidak overflow */
+  flex: 1;
+  min-width: 0;
 }
 
 .date-field label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   margin-bottom: 6px;
-  color: #1f2d3d;
-}
-
-.date-input-wrapper input[type="date"] {
-  padding-right: 38px;
+  display: block;
 }
 
 .date-input-wrapper input {
   width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #d0d7de;
-  background: #f9fafb;
-  transition: all 0.2s ease;
-  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 10px;     /* sedikit lebih smooth */
+  border: 1.5px solid #d0d7de;
+  background: #f8fafc;
+  font-size: 14px;
+  transition: 0.2s ease;
 }
 
 .date-input-wrapper input:focus {
-  border-color: #0d6efd;
   background: #fff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
+  border-color: #0a3d62;
+  box-shadow: 0 0 0 2px rgba(10,61,98,0.15);
 }
 
-/* Garis Pemisah */
 .date-divider {
-  width: 1px;
-  background: linear-gradient(to bottom, transparent, #d0d7de, transparent);
-  height: 55px;
-  margin-bottom: 6px;
+  display: none;
 }
 
 /* Responsif */
