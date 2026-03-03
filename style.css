@@ -373,3 +373,10 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
   border: 1px solid #baf5d1;
   color: #146c43;
 }
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
