@@ -287,19 +287,13 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
 
 .date-row {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  flex-direction: row;   /* selalu sejajar */
+  gap: 12px;
 }
 
-/* Hanya kalau layar cukup lebar */
-@media (min-width: 768px) {
-  .date-row {
-    flex-direction: row;
-  }
-
-  .date-field {
-    flex: 1;
-  }
+.date-field {
+  flex: 1;              /* bagi 2 sama rata */
+  min-width: 0;         /* penting supaya tidak overflow */
 }
 
 .date-field label {
@@ -315,12 +309,12 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
 
 .date-input-wrapper input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #d0d7de;
   background: #f9fafb;
   transition: all 0.2s ease;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .date-input-wrapper input:focus {
@@ -339,15 +333,6 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
 }
 
 /* Responsif */
-@media (max-width: 500px) {
-  .date-row {
-    flex-direction: column;
-  }
-
-  .date-divider {
-    display: none;
-  }
-}
 .izin-message {
   display: none;
   padding: 10px;
@@ -373,4 +358,3 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
   border: 1px solid #baf5d1;
   color: #146c43;
 }
-
