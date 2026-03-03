@@ -358,3 +358,21 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
   border: 1px solid #baf5d1;
   color: #146c43;
 }
+
+/* ===== iOS DATE INPUT FIX ===== */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #f9fafb;
+  height: 38px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 16px; /* penting agar iOS tidak auto zoom */
+  box-sizing: border-box;
+}
+
+/* Hilangkan style internal Safari */
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
