@@ -309,8 +309,8 @@ button[disabled] { opacity: .65; cursor: not-allowed; }
   color: #1f2d3d;
 }
 
-.date-input-wrapper {
-  position: relative;
+.date-input-wrapper input[type="date"] {
+  padding-right: 38px;
 }
 
 .date-input-wrapper input {
