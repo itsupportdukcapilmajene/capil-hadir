@@ -1,5 +1,5 @@
-//Version 28 on 3 Mar 2026, 11:50
-//https://script.google.com/macros/s/AKfycbw6L7Y6W6daOdZz0q8nYQAWQtUsJv9S2MOfXVwYnqTmtnWYTXVC6wxFMkagZ6mkcL4P/exec
+//Version 30 on 4 Mar 2026, 10:23
+//https://script.google.com/macros/s/AKfycbyja5DUCxirxnneCgocLVCtZY6P0-CFVP3Sj94zGtgnqZQevaWX1jjPyt8bUqb0gp25/exec
 
 /************** KONFIGURASI INTI (SESUAIKAN) **************/
 const APP_KEY        = 'absendukcapilmajene';
@@ -40,17 +40,7 @@ function doPost(e) {
 
     // Params
     const nip         = (p.nip || '').trim();
-    // ===== RATE LIMIT =====
-if(nip){
-  if(!checkRateLimit_(nip)){
-    return jsonOut({
-      ok:false,
-      message:'⛔ Terlalu banyak percobaan. Tunggu 1 menit.',
-      code:'RATE_LIMIT',
-      serverTime: tsNow_()
-    });
-  }
-}
+
     const status      = (p.status || '').toLowerCase(); // izin/sakit/pulang cepat
     const mode       = (p.mode || '').toUpperCase(); // FULL / PARTIAL
 const tglMulai   = p.tglMulai || '';
@@ -149,6 +139,70 @@ const IS_DINAS_LUAR = dinasLuar.active === true;
         return logAndReturn(resp, { nip, nama, aksi:'RIWAYAT_REGULER', lat, lng, accuracy });
       }
     }
+
+        // PRE-CHECK (tanpa tulis)
+if (checkOnly) {
+
+  if (apel) {
+
+    if (role !== ROLES.REGULER) {
+      const resp = { ok:false, warning:true, code:'APEL_ROLE_NOT_ALLOWED', message:'🚫 Apel tidak berlaku untuk peran ini.', serverTime:jamFull };
+      return logAndReturn(resp, { nip, nama, aksi:'APEL_PRECHECK', lat, lng, accuracy });
+    }
+
+    const allowedDays = ['Senin','Selasa','Rabu','Kamis'];
+    if (!allowedDays.includes(hari)) {
+      const resp = { ok:false, warning:true, code:'APEL_DAY_NOT_ALLOWED', message:'🚫 Apel hanya Senin–Kamis.', serverTime:jamFull };
+      return logAndReturn(resp, { nip, nama, aksi:'APEL_PRECHECK', lat, lng, accuracy });
+    }
+
+    if (!inWindow_(jamTotal, CFG.apel.start, CFG.apel.end)) {
+      const jamApel = `${CFG.apel.start}–${CFG.apel.end}`;
+      const resp = { ok:false, warning:true, code:'APEL_TIME_WINDOW', message:`🚫 Apel hanya pada ${jamApel} Wita.`, serverTime:jamFull };
+      return logAndReturn(resp, { nip, nama, aksi:'APEL_PRECHECK', lat, lng, accuracy });
+    }
+
+  } else {
+
+    if ((!bolehMasuk || isLiburKalenderFinal) && !skipJadwal && !force) {
+      const namaLibur = isLiburKalenderFinal ? getNamaHariLibur_(tanggal) : '';
+
+      const resp = {
+        ok:false,
+        warning:true,
+        code:'OUT_OF_SCHEDULE',
+        message:`⚠️ Hari ini ${hari}${namaLibur ? ' ('+namaLibur+')' : ''}, bukan jadwal kerja Anda.`,
+        serverTime:jamFull
+      };
+
+      return logAndReturn(resp, { nip, nama, aksi:'REGULER_PRECHECK', lat, lng, accuracy });
+    }
+  }
+
+  const resp = {
+    ok:true,
+    warning:false,
+    code:'PRECHECK_OK',
+    message:'✅ Valid, lanjutkan.',
+    nama:nama,
+    serverTime:jamFull,
+    serverDate:tanggalFull
+  };
+
+  return logAndReturn(resp, { nip, nama, aksi: apel?'APEL_PRECHECK':'REGULER_PRECHECK', lat, lng, accuracy });
+}
+
+        // ===== RATE LIMIT =====
+if(nip){
+  if(!checkRateLimit_(nip)){
+    return logAndReturn({
+      ok:false,
+      message:'⛔ Terlalu banyak percobaan. Tunggu 1 menit.',
+      code:'RATE_LIMIT',
+      serverTime: jamFull
+    }, { nip, nama, aksi:'RATE_LIMIT' });
+  }
+}
 
 
 // PENGAJUAN IZIN / SAKIT / PULANG CEPAT (SLOT-BASED)
@@ -293,57 +347,7 @@ if (!IS_DINAS_LUAR) {
   }
 }
 
-    // PRE-CHECK (tanpa tulis)
-if (checkOnly) {
 
-  if (apel) {
-
-    if (role !== ROLES.REGULER) {
-      const resp = { ok:false, warning:true, code:'APEL_ROLE_NOT_ALLOWED', message:'🚫 Apel tidak berlaku untuk peran ini.', serverTime:jamFull };
-      return logAndReturn(resp, { nip, nama, aksi:'APEL_PRECHECK', lat, lng, accuracy });
-    }
-
-    const allowedDays = ['Senin','Selasa','Rabu','Kamis'];
-    if (!allowedDays.includes(hari)) {
-      const resp = { ok:false, warning:true, code:'APEL_DAY_NOT_ALLOWED', message:'🚫 Apel hanya Senin–Kamis.', serverTime:jamFull };
-      return logAndReturn(resp, { nip, nama, aksi:'APEL_PRECHECK', lat, lng, accuracy });
-    }
-
-    if (!inWindow_(jamTotal, CFG.apel.start, CFG.apel.end)) {
-      const jamApel = `${CFG.apel.start}–${CFG.apel.end}`;
-      const resp = { ok:false, warning:true, code:'APEL_TIME_WINDOW', message:`🚫 Apel hanya pada ${jamApel} Wita.`, serverTime:jamFull };
-      return logAndReturn(resp, { nip, nama, aksi:'APEL_PRECHECK', lat, lng, accuracy });
-    }
-
-  } else {
-
-    if ((!bolehMasuk || isLiburKalenderFinal) && !skipJadwal && !force) {
-      const namaLibur = isLiburKalenderFinal ? getNamaHariLibur_(tanggal) : '';
-
-      const resp = {
-        ok:false,
-        warning:true,
-        code:'OUT_OF_SCHEDULE',
-        message:`⚠️ Hari ini ${hari}${namaLibur ? ' ('+namaLibur+')' : ''}, bukan jadwal kerja Anda.`,
-        serverTime:jamFull
-      };
-
-      return logAndReturn(resp, { nip, nama, aksi:'REGULER_PRECHECK', lat, lng, accuracy });
-    }
-  }
-
-  const resp = {
-    ok:true,
-    warning:false,
-    code:'PRECHECK_OK',
-    message:'✅ Valid, lanjutkan.',
-    nama:nama,
-    serverTime:jamFull,
-    serverDate:tanggalFull
-  };
-
-  return logAndReturn(resp, { nip, nama, aksi: apel?'APEL_PRECHECK':'REGULER_PRECHECK', lat, lng, accuracy });
-}
 
 
     // APEL (reguler; tanpa selfie)
@@ -428,7 +432,8 @@ return handleReguler_({
   accuracy,
   selfieBase64,
   selfieType,
-  selfieName
+  selfieName,
+  IS_DINAS_LUAR
 });
 
   } catch (err) {
@@ -599,7 +604,7 @@ function handleLateSlot_(params) {
   }
 
 // 🔒 JANGAN UBAH STATUS JIKA SUDAH HADIR
-if (!existingRow[6]) {
+if (!existingRow[6] || existingRow[6] === 'HADIR') {
   shAbsen.getRange(row,7).setValue('TELAT');
 }
 
@@ -651,10 +656,28 @@ function handleReguler_(ctx) {
     nip, nama, role, hari, tanggal, eff,
     jamHHmm, jamFull, jamTotal,
     lat, lng, accuracy,
-    selfieBase64, selfieType, selfieName
+    selfieBase64, selfieType, selfieName,
+    IS_DINAS_LUAR
   } = ctx;
 
   const win = getWindowsFromConfig_(CFG, hari);
+
+  // === CEK IZIN HARI INI (FULL DAY) ===
+  const izinHariIni = ['PAGI','SIANG','PULANG']
+    .map(s => getIzinSlot_(tanggal, nip, s))
+    .filter(Boolean);
+
+  if (izinHariIni.length === 3) {
+    return logAndReturn(
+      {
+        ok:false,
+        message:'🚫 Anda memiliki izin penuh yang disetujui hari ini.',
+        code:'IZIN_FULL_DAY',
+        serverTime: jamFull
+      },
+      { nip, nama, aksi:'REGULER' }
+    );
+  }
 
   let jenis='', timeCol=0, selfieCol=0;
 
@@ -671,40 +694,57 @@ function handleReguler_(ctx) {
     return handleRegulerOutsideWindow_(ctx, win);
   }
 
-  // === DALAM WINDOW NORMAL ===
+  // === CEK IZIN SLOT SPESIFIK ===
+  const SLOT_MAP_REVERSE = {
+    4:'PAGI',
+    5:'SIANG',
+    6:'PULANG'
+  };
 
+  const slotKey = SLOT_MAP_REVERSE[timeCol];
+  const izinApproved = getIzinSlot_(tanggal, nip, slotKey);
+
+  if (izinApproved) {
+    return logAndReturn(
+      {
+        ok:false,
+        message:`🚫 Anda sudah memiliki ${izinApproved.jenis} yang disetujui untuk ${jenis}.`,
+        code:'IZIN_ALREADY_APPROVED',
+        serverTime: jamFull
+      },
+      { nip, nama, aksi:jenis }
+    );
+  }
+
+  // === DALAM WINDOW NORMAL ===
   let idx = findRowIndex_(shAbsen, nip, tanggal);
   if (idx < 0) {
     shAbsen.appendRow([eff.dateObj,nip,nama,'','','','','','','','','']);
     idx = shAbsen.getLastRow()-1;
   }
 
-const row = idx + 1;
+  const row = idx + 1;
+  const existing = shAbsen.getRange(row,1,1,12).getValues()[0];
 
-// 🔒 ANTI DUPLICATE (WINDOW NORMAL)
-const existing = shAbsen.getRange(row,1,1,12).getValues()[0];
+  if (existing[timeCol-1]) {
+    return logAndReturn(
+      {
+        ok:false,
+        message:`⚠️ ${jenis} sudah dilakukan sebelumnya.`,
+        code:'ALREADY_FILLED',
+        serverTime:jamFull
+      },
+      { nip, nama, aksi:jenis, lat, lng, accuracy }
+    );
+  }
 
-if (existing[timeCol-1]) {
-  return logAndReturn(
-    {
-      ok:false,
-      message:`⚠️ ${jenis} sudah dilakukan sebelumnya.`,
-      code:'ALREADY_FILLED',
-      serverTime:jamFull
-    },
-    { nip, nama, aksi:jenis, lat, lng, accuracy }
-  );
-}
+  shAbsen.getRange(row,timeCol)
+    .setNumberFormat('@STRING@')
+    .setValue(jamHHmm);
 
-// ✅ Baru tulis jika kosong
-shAbsen.getRange(row,timeCol)
-  .setNumberFormat('@STRING@')
-  .setValue(jamHHmm);
-
-// 🔒 Jangan ubah TELAT jadi HADIR
-if (!existing[6]) {
-  shAbsen.getRange(row,7).setValue('HADIR');
-}
+  if (!existing[6]) {
+    shAbsen.getRange(row,7).setValue('HADIR');
+  }
 
   if (CFG.upload.selfie_required) {
 
@@ -721,8 +761,11 @@ if (!existing[6]) {
       );
 
     const selfieUrl = selfieBase64
-      ? uploadToDrive_(selfieBase64, selfieType||'image/jpeg',
-        `${nip}_${tanggal}_${jenis.replace(' ','').toUpperCase()}_${jamFull.replace(/[:]/g,'-')}_${sanitizeFileName_(selfieName)}`)
+      ? uploadToDrive_(
+          selfieBase64,
+          selfieType||'image/jpeg',
+          `${nip}_${tanggal}_${jenis.replace(' ','').toUpperCase()}_${jamFull.replace(/[:]/g,'-')}_${sanitizeFileName_(selfieName)}`
+        )
       : '';
 
     if (selfieUrl)
@@ -746,7 +789,6 @@ if (!existing[6]) {
     { nip, nama, aksi:jenis, lat, lng, accuracy }
   );
 }
-
 function handleRegulerOutsideWindow_(ctx, win) {
 
   const {
@@ -754,13 +796,37 @@ function handleRegulerOutsideWindow_(ctx, win) {
     nip, nama, role, hari, tanggal, eff,
     jamHHmm, jamFull, jamTotal,
     lat, lng, accuracy,
-    selfieBase64, selfieType, selfieName
+    selfieBase64, selfieType, selfieName,
+    IS_DINAS_LUAR
   } = ctx;
+// === CEK IZIN HARI INI (BLOCK TELAT JUGA) ===
+const izinHariIni = ['PAGI','SIANG','PULANG']
+  .map(s => getIzinSlot_(tanggal, nip, s))
+  .filter(Boolean);
 
+if (izinHariIni.length === 3) {
+  return logAndReturn(
+    {
+      ok:false,
+      message:'🚫 Anda memiliki izin penuh yang disetujui hari ini.',
+      code:'IZIN_FULL_DAY',
+      serverTime: jamFull
+    },
+    { nip, nama, aksi:'REGULER' }
+  );
+}
   // === VALIDASI GEO DULU ===
+// === VALIDASI GEO (kecuali dinas luar) ===
+if (!IS_DINAS_LUAR) {
+
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return logAndReturn(
-      { ok:false, message:`⏳ Belum waktunya absen.`, code:'OUT_OF_WINDOW_TOO_EARLY', serverTime:jamFull },
+      {
+        ok:false,
+        message:'📍 Lokasi tidak valid. Pastikan GPS aktif dan izin lokasi diberikan.',
+        code:'GEO_LOCATION_INVALID',
+        serverTime: jamFull
+      },
       { nip, nama, aksi:'REGULER', lat, lng, accuracy }
     );
   }
@@ -780,6 +846,7 @@ function handleRegulerOutsideWindow_(ctx, win) {
       { nip, nama, aksi:'REGULER', lat, lng, accuracy }
     );
   }
+}
 
   // 🔒 GLOBAL LATE LOCK
 if (CFG.policy.allow_late_absen !== true) {
@@ -826,6 +893,30 @@ if (existing[3] && existing[4] && existing[5]) {
     { nip, nama, aksi:'REGULER', lat, lng, accuracy }
   );
 }
+
+// === CEK IZIN SLOT TELAT ===
+const SLOT_MAP_REVERSE = {
+  4:'PAGI',
+  5:'SIANG',
+  6:'PULANG'
+};
+
+const slotKey = SLOT_MAP_REVERSE[prevSlot.timeCol];
+const izinApproved = getIzinSlot_(tanggal, nip, slotKey);
+
+if (izinApproved) {
+  return logAndReturn(
+    {
+      ok:false,
+      message:`🚫 Anda sudah memiliki ${izinApproved.jenis} yang disetujui untuk ${prevSlot.jenis}.`,
+      code:'IZIN_ALREADY_APPROVED',
+      serverTime: jamFull
+    },
+    { nip, nama, aksi:prevSlot.jenis }
+  );
+}
+
+
     const result = handleLateSlot_({
       shAbsen,
       ss,
@@ -892,6 +983,22 @@ if (CFG.policy.allow_late_absen !== true) {
 }
 
   const target = { jenis:'Absen Pulang', timeCol:6, selfieCol:12 };
+
+  // === CEK IZIN SLOT FINAL TARGET ===
+const slotKeyFinal = 'PULANG';
+const izinApprovedFinal = getIzinSlot_(tanggal, nip, slotKeyFinal);
+
+if (izinApprovedFinal) {
+  return logAndReturn(
+    {
+      ok:false,
+      message:`🚫 Anda sudah memiliki ${izinApprovedFinal.jenis} yang disetujui untuk ${target.jenis}.`,
+      code:'IZIN_ALREADY_APPROVED',
+      serverTime: jamFull
+    },
+    { nip, nama, aksi:target.jenis }
+  );
+}
 
   let idx2 = findRowIndex_(shAbsen, nip, tanggal);
   if (idx2 < 0) {
