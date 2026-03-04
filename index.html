@@ -217,7 +217,7 @@
 const CONFIG = {
   APP_KEY: 'absendukcapilmajene',
   // Ganti ke /exec aktif milik project Apps Script kamu:
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbw6L7Y6W6daOdZz0q8nYQAWQtUsJv9S2MOfXVwYnqTmtnWYTXVC6wxFMkagZ6mkcL4P/exec',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbyja5DUCxirxnneCgocLVCtZY6P0-CFVP3Sj94zGtgnqZQevaWX1jjPyt8bUqb0gp25/exec',
   OFFICE_LAT:null, OFFICE_LNG:null, MAX_RADIUS:null, MAX_ACCURACY:null,
   APEL_START:null, APEL_END:null,
   SELFIE_REQUIRED:true, MAX_SELFIE_MB:5, MAX_BUKTI_MB:10
@@ -316,8 +316,12 @@ rules.innerHTML = RULES_HTML
 
   }
 
-  REMOTE_READY=true;
-  notify('success', 'Konfigurasi berhasil dimuat.');
+if (data.serverTime) {
+  startServerClock((data.serverTime || '').slice(0,5));
+}
+
+REMOTE_READY = true;
+notify('success', 'Konfigurasi berhasil dimuat & jam disinkronkan.');
 }
 loadRemoteConfig().catch(err=>notify('error','Gagal memuat konfigurasi: '+err.message));
 
