@@ -123,6 +123,7 @@
           <th>Izin/Cuti</th>
           <th>Sakit</th>
           <th>Alpa</th>
+          <th>% Kehadiran</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -132,7 +133,7 @@
 </main>
 
 <script>
-const BASE_URL = 'https://script.google.com/macros/s/AKfycbxVa0ypl7H-NR2dEcEMM1wOViUKsibO8jDvGcJlA0BGsJc1OtGBKJe1s0tzqzEn8hJobQ/exec';
+const BASE_URL = 'https://script.google.com/macros/s/AKfycbwimRJLHl6IpBBrdX6sAKHqDIhMb-a_c1IsDayg9lgI32RTX1e9_oQbDg8Mu4QXPh-wXA/exec';
 
 // ===== PROTEKSI PIN =====
 document.addEventListener('DOMContentLoaded', async () => {
@@ -238,7 +239,8 @@ function render(d){
       <td>${r.HADIR}</td>
       <td>${r.IZIN}</td>
       <td>${r.SAKIT}</td>
-      <td>${r.ALPA}</td>`;
+      <td>${r.ALPA}</td>
+      <td>${r.PERSEN}%</td>`;
     tbody.appendChild(tr);
   });
   table.style.display=''; tools.style.display='';
