@@ -1,5 +1,5 @@
-//Version 8 on 3 Mar 2026, 09:544
-//https://script.google.com/macros/s/AKfycbzKDWGitYU3YX7EmSpVtEqm1Mv7E597XiEUki79nzOb8y7-7a3soGiMxeCn_20bzxeb3g/exec
+//Version 10 on 11 Mar 2026, 14:05
+//https://script.google.com/macros/s/AKfycbxVa0ypl7H-NR2dEcEMM1wOViUKsibO8jDvGcJlA0BGsJc1OtGBKJe1s0tzqzEn8hJobQ/exec
 
 /****************************************************
  * CAPIL HADIR – REKAP SUMMARY v1.0 (FINAL)
@@ -86,16 +86,19 @@ shPeg.getDataRange().getValues().slice(1)
 
     const wk = String(r[6]||'').toUpperCase(); // kolom G (Waktu Kerja)
 
-    let pola = 'FULL';
-    if(wk.includes('GANJIL')) pola='GANJIL';
-    else if(wk.includes('GENAP')) pola='GENAP';
+   let pola = 'FULL';
 
-    pegMap[nip]={
-      nip,
-      nama,
-      pola,
-      status: statusPeg
-    };
+if(wk.includes('GANJIL')) pola = 'GANJIL';
+else if(wk.includes('GENAP')) pola = 'GENAP';
+else pola = 'FULL';
+
+pegMap[nip]={
+  nip,
+  nama,
+  pola,
+  status: statusPeg,
+  waktuKerja: pola
+};
   });
 
 
@@ -158,7 +161,7 @@ shPeg.getDataRange().getValues().slice(1)
   if(statusFilter !== 'ALL' && pegMap[nip].status !== statusFilter){
     return;
   }
-    let APEL=0,HADIR=0,IZIN=0,SAKIT=0;
+    let APEL=0,HADIR=0,IZIN=0,SAKIT=0,ALPA=0;
 
     for(let d=1; d<=days; d++){
       const dt=new Date(year,m0,d);
@@ -183,25 +186,29 @@ shPeg.getDataRange().getValues().slice(1)
       const a=absMap[nip]?.[t]||{};
       const i=izinMap[nip]?.[t]||{};
 
-      if(a.hadir||i.hadir){
-        HADIR++;
-      }else if(i.sakit){
-        SAKIT++;
-      }else if(i.izin){
-        IZIN++;
-      }
+     if(a.hadir || i.hadir){
+  HADIR++;
+}else if(i.sakit){
+  SAKIT++;
+}else if(i.izin){
+  IZIN++;
+}else{
+  ALPA++;
+}
     }
 
-    rows.push({
-      NO:no++,
-      NIP:nip,
-      NAMA:pegMap[nip].nama,
-      STATUS: pegMap[nip].status, // ⬅️ tambahkan
-      APEL,
-      HADIR,
-      IZIN,
-      SAKIT
-    });
+rows.push({
+  NO:no++,
+  NIP:nip,
+  NAMA:pegMap[nip].nama,
+  STATUS: pegMap[nip].status,
+  WAKTU_KERJA: pegMap[nip].waktuKerja,
+  APEL,
+  HADIR,
+  IZIN,
+  SAKIT,
+  ALPA
+});
   });
 
   return {
