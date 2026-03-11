@@ -117,10 +117,12 @@
           <th>NIP</th>
           <th>Nama</th>
           <th>Status</th>
+          <th>Waktu Kerja</th>
           <th>Apel</th>
           <th>Hadir</th>
           <th>Izin/Cuti</th>
           <th>Sakit</th>
+          <th>Alpa</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -130,7 +132,7 @@
 </main>
 
 <script>
-const BASE_URL = 'https://script.google.com/macros/s/AKfycbzKDWGitYU3YX7EmSpVtEqm1Mv7E597XiEUki79nzOb8y7-7a3soGiMxeCn_20bzxeb3g/exec';
+const BASE_URL = 'https://script.google.com/macros/s/AKfycbxVa0ypl7H-NR2dEcEMM1wOViUKsibO8jDvGcJlA0BGsJc1OtGBKJe1s0tzqzEn8hJobQ/exec';
 
 // ===== PROTEKSI PIN =====
 document.addEventListener('DOMContentLoaded', async () => {
@@ -231,17 +233,19 @@ function render(d){
       <td>'${r.NIP}</td>
       <td>${r.NAMA}</td>
       <td>${statusBadge(r.STATUS)}</td>
+      <td>${r.WAKTU_KERJA}</td>
       <td>${r.APEL}</td>
       <td>${r.HADIR}</td>
       <td>${r.IZIN}</td>
-      <td>${r.SAKIT}</td>`;
+      <td>${r.SAKIT}</td>
+      <td>${r.ALPA}</td>`;
     tbody.appendChild(tr);
   });
   table.style.display=''; tools.style.display='';
 }
 
 function downloadCSV(){
-  const header=['NO','NIP','NAMA','STATUS','APEL','HADIR','IZIN','SAKIT'];
+  const header=['NO','NIP','NAMA','STATUS','APEL','HADIR','IZIN','SAKIT','ALPA'];
   const rows = lastRows.map(r=>[
     r.NO,
     `="${r.NIP}"`, // ⬅️ AMAN: NIP tidak terpotong di Excel
@@ -250,7 +254,8 @@ function downloadCSV(){
     r.APEL,
     r.HADIR,
     r.IZIN,
-    r.SAKIT
+    r.SAKIT,
+    r.ALPA
   ]);
   const csv = [header,...rows].map(r=>r.join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
