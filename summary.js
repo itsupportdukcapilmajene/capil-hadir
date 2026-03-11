@@ -1,5 +1,5 @@
-//Version 10 on 11 Mar 2026, 14:05
-//https://script.google.com/macros/s/AKfycbxVa0ypl7H-NR2dEcEMM1wOViUKsibO8jDvGcJlA0BGsJc1OtGBKJe1s0tzqzEn8hJobQ/exec
+//Version 11 on 11 Mar 2026, 14:38
+//https://script.google.com/macros/s/AKfycbwimRJLHl6IpBBrdX6sAKHqDIhMb-a_c1IsDayg9lgI32RTX1e9_oQbDg8Mu4QXPh-wXA/exec
 
 /****************************************************
  * CAPIL HADIR – REKAP SUMMARY v1.0 (FINAL)
@@ -197,6 +197,12 @@ pegMap[nip]={
 }
     }
 
+const totalHari = HADIR + IZIN + SAKIT + ALPA;
+
+const persen = totalHari > 0
+  ? Math.round(((HADIR + IZIN + SAKIT) / totalHari) * 100)
+  : 0;
+
 rows.push({
   NO:no++,
   NIP:nip,
@@ -207,7 +213,8 @@ rows.push({
   HADIR,
   IZIN,
   SAKIT,
-  ALPA
+  ALPA,
+  PERSEN: persen
 });
   });
 
